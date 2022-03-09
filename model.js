@@ -1,36 +1,7 @@
 const Realm = require('realm')
 
-let UserSchema = {
-    name: 'User',
-    primaryKey: 'name',
-    properties: {
-        name: 'string',
-        passwd: 'string'
-    }
-}
 
-let PostSchema = {
-    name: 'Post',
-    primaryKey: 'title',
-    properties: {
-        timestamp: 'date',
-        title: 'string',
-        content: 'string',
-        author: 'User',
-        blog: 'Blog'
-    }
-}
-
-let BlogSchema = {
-    name: 'Blog',
-    primaryKey: 'title',
-    properties: {
-        title: 'string',
-        creator: 'User' //esto es una referencia a un usuario
-    }
-}
-
-/*let IssuingSchema = {
+let IssuingSchema = {
   name: 'Issuing',
   primariKey: 'id',
   properties: {
@@ -41,11 +12,48 @@ let BlogSchema = {
     passwd: 'string',
     wishes: 'Wish[]',
   }
-}*/
+}
+
+let DonorSchema = {
+    name: 'Donor',
+    primariKey: 'id',
+    properties: {
+        id: 'int',
+        name: 'string',
+        surmane: 'string',
+        email: 'string',
+        passwd: 'string',
+        wishes: 'Wish[]',
+    }
+}
+
+let WishScheme = {
+    name: 'Wish',
+    primariKey: 'id',
+    properties: {
+        id: 'int',
+        timestamp: 'date',
+        name: 'string',
+        description: 'string',
+        price: 'int',
+    }
+}
+
+let TransactionSchema = {
+    name: 'Transaction',
+    primariKey: 'id',
+    properties: {
+        id: 'int',
+        timestamp: 'date',
+        issuing: 'Issuing',
+        donor: 'Donor',
+        wish: 'Wish',
+    }
+}
 
 // // // MODULE EXPORTS
 
-let config = { path: './data/blogs.realm', schema: [PostSchema, UserSchema, BlogSchema] }
+let config = { path: './data/blogs.realm', schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema] }
 
 exports.getDB = async() => await Realm.open(config)
 
@@ -59,34 +67,35 @@ if (process.argv[1] == __filename) { //TESTING PART
 
         let DB = new Realm({
             path: './data/blogs.realm',
-            schema: [PostSchema, UserSchema, BlogSchema]
+            schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema]
         })
 
         DB.write(() => {
-            let user = DB.create('User', { name: 'user0', passwd: 'xxx' })
 
-            let blog = DB.create('Blog', { title: 'Todo Motos', creator: user })
+            let issuing = DB.create('Issuing', {id: 1, name: 'ainhoa', surname: 'tomas', email: 'correoAinhoa', passwd: '1234', wishes: []})
 
-            let post = DB.create('Post', {
-                title: 'prueba moto',
-                blog: blog,
-                content: 'esto es una prueba de motos',
-                creator: user,
-                timestamp: new Date()
-            })
+            let donor = DB.create('Donor', {id: 1, name: 'marc', surname: 'villanueva', email: 'correoMarc', passwd: '123', wishes: []})
 
-            console.log('Inserted objects', user, blog, post)
+            let wish = DB.create('Wish', {id: 1, timestamp: new Date(), name: 'Deseo 1', description: 'Descripcion', price: 12})
+
+            let transaction = DB.create('Transaction', {id: 1, timestamp: new Date(), issuing: issuing, donor:donor, wish: wish})
+
+            console.log('Inserted objects', issuing, donor, wish, transaction)
         })
         DB.close()
 
     } else { //consultar la BD
 
-        Realm.open({ path: './data/blogs.realm', schema: [PostSchema, UserSchema, BlogSchema] }).then(DB => {
-            let users = DB.objects('User')
-            users.forEach(x => console.log(x.name))
-            let blog = DB.objectForPrimaryKey('Blog', 'Todo Motos')
-            if (blog)
-                console.log(blog.title, 'by', blog.creator.name)
+        Realm.open({ path: './data/blogs.realm', schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema] }).then(DB => {
+            let issuings = DB.objects('Issuing')
+            issuings.forEach(x => console.log(x.name))
+            let donors = DB.objects('Donor')
+            donors.forEach(x => console.log(x.name))
+            let wishes = DB.objects('Wish')
+            wishes.forEach(x => console.log(x.name))
+            let transactions = DB.objects('Transaction')
+            if (transactions)
+                console.log(transactions.id, 'by', transactions.donor.name, 'to', transactions.issuing.name, 'for', transactions.wish.name)
             DB.close()
         })
     }
