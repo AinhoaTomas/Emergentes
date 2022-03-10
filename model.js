@@ -1,11 +1,12 @@
 const Realm = require('realm')
+const BSON = require('bson')
 
 
 let IssuingSchema = {
   name: 'Issuing',
-  primariKey: 'id',
+  primaryKey: 'id',
   properties: {
-    id: 'int',
+    id: 'objectId',
     name: 'string',
     surname: 'string',
     email: 'string',
@@ -16,11 +17,11 @@ let IssuingSchema = {
 
 let DonorSchema = {
     name: 'Donor',
-    primariKey: 'id',
+    primaryKey: 'id',
     properties: {
-        id: 'int',
+        id: 'objectId',
         name: 'string',
-        surmane: 'string',
+        surname: 'string',
         email: 'string',
         passwd: 'string',
         wishes: 'Wish[]',
@@ -29,19 +30,20 @@ let DonorSchema = {
 
 let WishScheme = {
     name: 'Wish',
-    primariKey: 'id',
+    primaryKey: 'id',
     properties: {
         id: 'int',
         timestamp: 'date',
         name: 'string',
         description: 'string',
-        price: 'double',
+        price: 'float',
+        issuing: 'Issuing',
     }
 }
 
 let TransactionSchema = {
     name: 'Transaction',
-    primariKey: 'id',
+    primaryKey: 'id',
     properties: {
         id: 'int',
         timestamp: 'date',
@@ -72,11 +74,11 @@ if (process.argv[1] == __filename) { //TESTING PART
 
         DB.write(() => {
 
-            let issuing = DB.create('Issuing', {id: 1, name: 'ainhoa', surname: 'tomas', email: 'correoAinhoa', passwd: '1234', wishes: []})
+            let issuing = DB.create('Issuing', {id: new BSON.ObjectID, name: 'ainhoa', surname: 'tomas', email: 'correoAinhoa', passwd: '1234', wishes: []})
 
-            let donor = DB.create('Donor', {id: 1, name: 'marc', surname: 'villanueva', email: 'correoMarc', passwd: '123', wishes: []})
+            let donor = DB.create('Donor', {id: new BSON.ObjectID, name: 'marc', surname: 'villanueva', email: 'correoMarc', passwd: '123', wishes: []})
 
-            let wish = DB.create('Wish', {id: 1, timestamp: new Date(), name: 'Deseo 1', description: 'Descripcion', price: 12})
+            let wish = DB.create('Wish', {id: 1, timestamp: new Date(), name: 'Deseo 1', description: 'Descripcion', price: 12, issuing: issuing})
 
             let transaction = DB.create('Transaction', {id: 1, timestamp: new Date(), issuing: issuing, donor:donor, wish: wish})
 
@@ -88,14 +90,13 @@ if (process.argv[1] == __filename) { //TESTING PART
 
         Realm.open({ path: './data/blogs.realm', schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema] }).then(DB => {
             let issuings = DB.objects('Issuing')
-            issuings.forEach(x => console.log(x.name))
+            issuings.forEach(x => console.log(x.name, x._objectId()))
             let donors = DB.objects('Donor')
-            donors.forEach(x => console.log(x.name))
+            donors.forEach(x => console.log(x.name, x._objectId()))
             let wishes = DB.objects('Wish')
-            wishes.forEach(x => console.log(x.name))
-            let transactions = DB.objects('Transaction')
-            if (transactions)
-                console.log(transactions.id, 'by', transactions.donor.name, 'to', transactions.issuing.name, 'for', transactions.wish.name)
+            wishes.forEach(x => console.log(x.name, x.issuing.name, x.timestamp, x.price))
+            let transaction = DB.objects('Transaction')
+            transaction.forEach(x => console.log(x.id, x.donor.name, x.issuing.name, x.wish.name))
             DB.close()
         })
     }

@@ -19,10 +19,11 @@ const schema = buildSchema(`
     transactions: [Transaction]
     
     searchWish(name:String!):[Wish]
-    wishes(userId:ID!):[Wish]
+    wishesIssuing(issuingId:ID!):[Wish]
+    wishesDonor(donorId:ID!):[Wish]
   }
   type Mutation {
-    addWish(name:String!, description:String!, price:double!):Wish!
+    addWish(name:String!, description:String!, price:Float!):Wish!
     addIssuing(name:String!, surname:String!, email:String!, passwd:String!):Issuing!
     addDonor(name:String!, surname:String!, email:String!, passwd:String!):Donor!
     addTransaction(wishId:ID!, issuingId:ID!, donorId:ID!):Transaction!
@@ -39,8 +40,8 @@ const schema = buildSchema(`
 
   type Wish{
 	name: String
-	desccription: String
-	price: Double
+	description: String
+	price: Float
   }
 
   type Transaction{
@@ -53,6 +54,9 @@ const schema = buildSchema(`
 
 const rootValue = {
     hello: () => "Hello World!",
+    issuings: () => DB.objects('Issuing'),
+    donors: () => DB.objects('Donor'),
+    wishes: () => DB.objects('Wish'),
     users: () => DB.objects('User'),
     blogs: () => DB.objects('Blog'),
     searchBlog: ({ q }) => {
