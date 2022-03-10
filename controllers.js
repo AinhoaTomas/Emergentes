@@ -13,31 +13,40 @@ sse.start()
 const schema = buildSchema(`
   type Query {
     hello: String
-    users: [User]
-    blogs: [Blog]
-    searchBlog(q:String!):[Blog]
-    posts(blogId:ID!):[Post]
-    searchPost(blogId:ID!, q:String!):[Post]
+    issuings: [Issuing]
+    donors: [Donor]
+    wishes: [Wish]
+    transactions: [Transaction]
+    
+    searchWish(name:String!):[Wish]
+    wishes(userId:ID!):[Wish]
   }
   type Mutation {
-    addUser(name:String!):User!
-    addBlog(title:String!,creator:ID!):Blog!
-    addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
+    addWish(name:String!, description:String!, price:double!):Wish!
+    addIssuing(name:String!, surname:String!, email:String!, passwd:String!):Issuing!
+    addDonor(name:String!, surname:String!, email:String!, passwd:String!):Donor!
+    addTransaction(wishId:ID!, issuingId:ID!, donorId:ID!):Transaction!
   }
-  type User{
+  type Issuing{
 	name: String
+	email: String
+  }
+  
+  type Donor{
+    name: String
+    email: String
   }
 
-  type Post{
-	title: String
-	content: String
-	author: User
-	blog: Blog
+  type Wish{
+	name: String
+	desccription: String
+	price: Double
   }
 
-  type Blog{
-	creator: User
-	title: String
+  type Transaction{
+	issuing: Issuing
+	donor: Donor
+	wish: Wish
   }
 `)
 

@@ -35,7 +35,7 @@ let WishScheme = {
         timestamp: 'date',
         name: 'string',
         description: 'string',
-        price: 'int',
+        price: 'double',
     }
 }
 
