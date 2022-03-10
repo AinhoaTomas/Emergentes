@@ -19,8 +19,8 @@ const schema = buildSchema(`
     transactions: [Transaction]
     
     searchWish(name:String!):[Wish]
-    wishesIssuing(issuingId:ID!):[Wish]
-    wishesDonor(donorId:ID!):[Wish]
+    wishesIssuing(issuingId:Int!):[Wish]
+    transactionsDonor(donorId:Int!):[Transaction]
   }
   type Mutation {
     addWish(name:String!, description:String!, price:Float!):Wish!
@@ -31,17 +31,20 @@ const schema = buildSchema(`
   type Issuing{
 	name: String
 	email: String
+	id: Int
   }
   
   type Donor{
     name: String
     email: String
+    id: Int
   }
 
   type Wish{
 	name: String
 	description: String
 	price: Float
+	issuing: Issuing
   }
 
   type Transaction{
@@ -57,14 +60,15 @@ const rootValue = {
     issuings: () => DB.objects('Issuing'),
     donors: () => DB.objects('Donor'),
     wishes: () => DB.objects('Wish'),
-    users: () => DB.objects('User'),
-    blogs: () => DB.objects('Blog'),
-    searchBlog: ({ q }) => {
-        q = q.toLowerCase()
-        return DB.objects('Blog').filter(x => x.title.toLowerCase().includes(q))
+    transactions: () => DB.objects('Transaction'),
+    searchWish: ({ name }) => {
+        return DB.objects('Wish').filter(x => x.name === name)
     },
-    posts: ({ blogId }) => {
-        return DB.objects('Post').filter(x => x.blog.title == blogId)
+    wishesIssuing: ({ issuingId }) => {
+        return DB.objects('Wish').filter(x => x.issuing.id === issuingId)
+    },
+    transactionsDonor: ({ donorId }) => {
+        return DB.objects('Transaction').filter(x => x.donor.id === donorId)
     },
     addPost: ({ title, content, authorId, blogId }) => {
 
