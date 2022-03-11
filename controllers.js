@@ -1,4 +1,5 @@
 const { graphql, buildSchema } = require('graphql')
+const BSON = require('bson')
 
 const model = require('./model') //Database
 
@@ -108,6 +109,83 @@ const rootValue = {
             sse.emitter.emit('new-user', user)
         }
         return data
+    },
+    addWish: ({ name, description, price}) => {
+        let currId = DB.objectForPrimaryKey('currentUserID') // id user actual
+        let currIssuer = issuings.find(x => x.id === currId).foo
+
+        if (currIssuer){
+            let data = {
+                id: BSON.ObjectID(),
+                timestamp: Date.now(),
+                name: name,
+                description: description,
+                price: price,
+                issuing: currIssuer,
+            }
+
+            DB.write(() => {DB.create('Wish', data) })
+
+            let wish = { name: data.name, description: data.description, price: data.price }
+            sse.emitter.emit('new-wish', wish)
+        }
+        return data
+    },
+    addIssuing: ({ name, surname, email, passwd }) => {
+        //let currEmail = issuings.find(x=>x.email === email) //encontrar email si existe
+        let data = null
+        //if (!currEmail){
+            data = {
+                id:BSON.ObjectID(),
+                name: name,
+                surname: surname,
+                email: email,
+                passwd: passwd,
+                wishes: [Wish], // [Wish] pero wish no definido
+            }
+            DB.write(() => {DB.create('Issuing', data) })
+        //}
+        return data
+    },
+    addDonor: ({ name, surname, email, passwd }) => {
+        //let currEmail = issuings.find(x=>x.email === email)
+        let data = null
+        //if (!currEmail){
+            data = {
+                id:BSON.ObjectID(),
+                name: name,
+                surname: surname,
+                email: email,
+                passwd: passwd,
+                wishes: Array[null], // [Wish] pero wish no definido
+            }
+            DB.write(() => {DB.create('Donor', data) })
+        //}
+        return data
+    },
+    addTransaction: ({ wishId, issuingId, donorId }) => {   // no se puede probar
+        let currWish = wishes.find( x=> x.id === wishId).foo
+        let transactionByWishId = transactions.find(x=>x.wish === currWish)
+        let data = null
+
+        if (transactionByWishId == undefined){
+            data = {
+                id:3,
+                timestamp: Date.now(),
+                issuing: issuings.find(x => x.id === issuingId).foo,
+                donor: donors.find(x => x.id === donorId).foo,
+                wish: currWish,
+            }
+            DB.write(() => {DB.create('Transaction', data) })
+        }
+        return data
+    },
+    userWishes: ({ userId }) => {
+        let user = issuings.find(x=>x.id === userId).foo
+        if(user == undefined){
+            user = donors.find(x=x.id === userId).foo
+        }
+        return user.wishes
     }
 }
 
