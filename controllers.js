@@ -116,7 +116,7 @@ const rootValue = {
 
         if (currIssuer){
             let data = {
-                id: BSON.ObjectID(),
+                id: 12,
                 timestamp: Date.now(),
                 name: name,
                 description: description,
@@ -136,12 +136,12 @@ const rootValue = {
         let data = null
         //if (!currEmail){
             data = {
-                id:BSON.ObjectID(),
+                id:126,
                 name: name,
                 surname: surname,
                 email: email,
                 passwd: passwd,
-                wishes: [Wish], // [Wish] pero wish no definido
+                wishes: Array[null], // [Wish] pero wish no definido
             }
             DB.write(() => {DB.create('Issuing', data) })
         //}
@@ -152,7 +152,7 @@ const rootValue = {
         let data = null
         //if (!currEmail){
             data = {
-                id:BSON.ObjectID(),
+                id:127,
                 name: name,
                 surname: surname,
                 email: email,
