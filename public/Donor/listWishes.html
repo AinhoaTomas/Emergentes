@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
@@ -20,24 +19,109 @@
 </head>
 
 <body>
-    <!-- Our application root element -->
-    <div id="app">
-        <b-container>
-            <b-jumbotron header="Reality Wishes" lead="Make your wishes come true">
-                <p>Para publicar un deseo:</p>
-                <b-btn variant="danger" href="./Issuing/indexIssuing.html">¡ Pedir Deseo !</b-btn>
-                <p></p>
-                <p>Para contribuir a un deseo:</p>
-                <b-btn variant="danger" href="./Donor/indexDonor.html">¡ Contribuir Deseo !</b-btn>
-                <b-btn variant="danger" href="">Registrarse</b-btn>
-            </b-jumbotron>
-            <b-btn variant="danger" href="">Registrarse</b-btn>
-        </b-container>
+<!-- Our application root element -->
+<div id="app">
+    <b-container>
+        <b-input-group size="sm" class="mb-2">
+            <b-input-group-prepend is-text>
+                <b-icon icon="search"></b-icon>
+            </b-input-group-prepend>
+            <b-form-input type="search" placeholder="Search terms"></b-form-input>
+        </b-input-group>
 
-    </div>
+        <b-dropdown text="Primary" variant="primary" class="m-2">
+            <b-dropdown-item href="#">Action</b-dropdown-item>
+            <b-dropdown-item href="#">Another action</b-dropdown-item>
+            <b-dropdown-item href="#">Something else here</b-dropdown-item>
+        </b-dropdown>
 
-    <!-- Start running your app -->
-    <script>
+    </b-container>
+
+    <b-container>
+            <b-card img-src="https://placekitten.com/300/300" img-alt="Card image" img-left class="mb-3">
+                <b-card-text>
+                    Some quick example text to build on the card and make up the bulk of the card's content.
+                </b-card-text>
+                <b-button variant="primary" class="mb-2">
+                    Pay now <b-icon icon="credit-card" aria-hidden="true"></b-icon>
+                </b-button>
+
+                <b-button href="#" variant="primary" class="mb-2">Go somewhere</b-button>
+            </b-card>
+
+            <b-card img-src="https://placekitten.com/300/300" img-alt="Card image" img-left class="mb-3">
+                <b-card-text>
+                    Some quick example text to build on the card and make up the bulk of the card's content.
+                </b-card-text>
+
+                <b-button variant="primary" class="mb-2">
+                    Pay now
+                    <!--<b-icon icon="credit-card" aria-hidden="true"></b-icon>-->
+                </b-button>
+
+                <b-button href="#" variant="primary" class="mb-2">Go somewhere</b-button>
+            </b-card>
+
+        <b-card img-src="https://placekitten.com/300/300" img-alt="Card image" img-left class="mb-3">
+            <b-card-text>
+                Some quick example text to build on the card and make up the bulk of the card's content.
+            </b-card-text>
+
+            <b-button variant="primary" class="mb-2">
+                Pay now
+                <!--<b-icon icon="credit-card" aria-hidden="true"></b-icon>-->
+            </b-button>
+
+            <b-button href="#" variant="primary" class="mb-2">Go somewhere</b-button>
+        </b-card>
+
+        <b-card img-src="https://placekitten.com/300/300" img-alt="Card image" img-left class="mb-3">
+            <b-card-text>
+                Some quick example text to build on the card and make up the bulk of the card's content.
+            </b-card-text>
+
+            <b-button variant="primary" class="mb-2">
+                Pay now
+                <!--<b-icon icon="credit-card" aria-hidden="true"></b-icon>-->
+            </b-button>
+
+            <b-button href="#" variant="primary" class="mb-2">Go somewhere</b-button>
+        </b-card>
+
+        <b-card img-src="https://placekitten.com/300/300" img-alt="Card image" img-left class="mb-3">
+            <b-card-text>
+                Some quick example text to build on the card and make up the bulk of the card's content.
+            </b-card-text>
+
+            <b-button variant="primary" class="mb-2">
+                Pay now
+                <!--<b-icon icon="credit-card" aria-hidden="true"></b-icon>-->
+            </b-button>
+
+            <b-button href="#" variant="primary" class="mb-2">Go somewhere</b-button>
+        </b-card>
+
+        <b-card img-src="https://placekitten.com/300/300" img-alt="Card image" img-left class="mb-3">
+            <b-card-text>
+                Some quick example text to build on the card and make up the bulk of the card's content.
+            </b-card-text>
+
+            <b-button variant="primary" class="mb-2">
+                Pay now
+                <!--<b-icon icon="credit-card" aria-hidden="true"></b-icon>-->
+            </b-button>
+
+            <b-button href="#" variant="primary" class="mb-2">Go somewhere</b-button>
+        </b-card>
+
+    </b-container>
+
+
+
+</div>
+
+<!-- Start running your app -->
+<script>
         window.app = new Vue({
             el: '#app',
             data: {
@@ -96,9 +180,9 @@
 
                     this.postId++
 
-                        var gQL = `mutation{addPost(blogId:"${this.blogId}", 
-                                        title: "Prueba ${this.name} ${this.postId}", 
-                                        content: "${this.post}", 
+                        var gQL = `mutation{addPost(blogId:"${this.blogId}",
+                                        title: "Prueba ${this.name} ${this.postId}",
+                                        content: "${this.post}",
                                         authorId: "${this.name}")
                                 {title}}`
 
