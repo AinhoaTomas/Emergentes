@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
@@ -20,24 +19,72 @@
 </head>
 
 <body>
-    <!-- Our application root element -->
-    <div id="app">
-        <b-container>
-            <b-jumbotron header="Reality Wishes" lead="Make your wishes come true">
-                <p>Para publicar un deseo:</p>
-                <b-btn variant="danger" href="./Issuing/indexIssuing.html">¡ Pedir Deseo !</b-btn>
-                <p></p>
-                <p>Para contribuir a un deseo:</p>
-                <b-btn variant="danger" href="./Donor/indexDonor.html">¡ Contribuir Deseo !</b-btn>
-                <b-btn variant="danger" href="">Registrarse</b-btn>
-            </b-jumbotron>
-            <b-btn variant="danger" href="">Registrarse</b-btn>
-        </b-container>
+<!-- Our application root element -->
+<div id="app">
+    <b-card bg-variant="light">
+        <b-form-group
+                label-cols-lg="3"
+                label="Shipping Address"
+                label-size="lg"
+                label-class="font-weight-bold pt-0"
+                class="mb-0"
+        >
+            <b-form-group
+                    label="Street:"
+                    label-for="nested-street"
+                    label-cols-sm="3"
+                    label-align-sm="right"
+            >
+                <b-form-input id="nested-street"></b-form-input>
+            </b-form-group>
 
-    </div>
+            <b-form-group
+                    label="City:"
+                    label-for="nested-city"
+                    label-cols-sm="3"
+                    label-align-sm="right"
+            >
+                <b-form-input id="nested-city"></b-form-input>
+            </b-form-group>
 
-    <!-- Start running your app -->
-    <script>
+            <b-form-group
+                    label="State:"
+                    label-for="nested-state"
+                    label-cols-sm="3"
+                    label-align-sm="right"
+            >
+                <b-form-input id="nested-state"></b-form-input>
+            </b-form-group>
+
+            <b-form-group
+                    label="Country:"
+                    label-for="nested-country"
+                    label-cols-sm="3"
+                    label-align-sm="right"
+            >
+                <b-form-input id="nested-country"></b-form-input>
+            </b-form-group>
+
+            <b-form-group
+                    label="Ship via:"
+                    label-cols-sm="3"
+                    label-align-sm="right"
+                    class="mb-0"
+                    v-slot="{ ariaDescribedby }"
+            >
+                <b-form-radio-group
+                        class="pt-2"
+                        :options="['Air', 'Courier', 'Mail']"
+                        :aria-describedby="ariaDescribedby"
+                ></b-form-radio-group>
+            </b-form-group>
+        </b-form-group>
+    </b-card>
+
+</div>
+
+<!-- Start running your app -->
+<script>
         window.app = new Vue({
             el: '#app',
             data: {
@@ -96,9 +143,9 @@
 
                     this.postId++
 
-                        var gQL = `mutation{addPost(blogId:"${this.blogId}", 
-                                        title: "Prueba ${this.name} ${this.postId}", 
-                                        content: "${this.post}", 
+                        var gQL = `mutation{addPost(blogId:"${this.blogId}",
+                                        title: "Prueba ${this.name} ${this.postId}",
+                                        content: "${this.post}",
                                         authorId: "${this.name}")
                                 {title}}`
 
