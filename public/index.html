@@ -25,13 +25,14 @@
         <b-container>
             <b-jumbotron header="Reality Wishes" lead="Make your wishes come true">
                 <p>Para publicar un deseo:</p>
-                <b-btn variant="danger" href="./Issuing/indexIssuing.html">¡ Pedir Deseo !</b-btn>
+                <b-btn variant="danger" href="./Issunig/indexIssuing.html">¡ Pedir deseos !</b-btn>
                 <p></p>
                 <p>Para contribuir a un deseo:</p>
-                <b-btn variant="danger" href="./Donor/indexDonor.html">¡ Contribuir Deseo !</b-btn>
-                <b-btn variant="danger" href="">Registrarse</b-btn>
+                <b-btn variant="danger" href="./Donor/wish.html">¡ Subvencionar deseos !</b-btn>
             </b-jumbotron>
-            <b-btn variant="danger" href="">Registrarse</b-btn>
+            <hr>
+            <b-btn variant="danger" href="./Issuing/createIssuing.html">Registrarse para pedir deseos</b-btn>
+            <b-btn variant="danger" href="./Donor/createDonor.html">Registrarse para subvencionar deseos</b-btn>
         </b-container>
 
     </div>
@@ -44,11 +45,11 @@
                 name: '', //nombre de usuario (no se usa)
                 query: '', //búsqueda
                 blogId: '', //blog activado
-                blogs: [], //blogs de la búsqueda
-                posts: [], //posts del blog activado
-                users: [],
+                issuings: [],
+                donors: [],
+                wishes: [],
+                transactions: [],
                 post: '', //nuevo post
-                postId: 0
             },
             computed: {
                 showAlert() {
@@ -56,6 +57,22 @@
                 }
             },
             methods: {
+                searchWish() {
+                    var self = this
+                    var gql = `query{searchWish(name:"${this.query}"){name description price}}`
+
+                    fetch('/graphql?query=' + encodeURIComponent(gql))
+                    .then(function(r) {
+                        return r.json()
+                    })
+                    .then(function (json){
+                        self.wishes = json.data.searchWish
+                    })
+                    .catch(function(error) {
+                        console.log(error)
+                    })
+                },
+
                 searchBlogs() {
                     var self = this
                     var gQL = `query{searchBlog(q:"${this.query}"){title creator{name}}}`
@@ -121,6 +138,29 @@
                         .catch(function(error) {
                             console.log(error)
                         })
+                },
+                addIssuing() {
+                    var self = this
+                    var gql = `mutation{addIssuing(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name email}}`
+                    console.log(gql)
+                    fetch('/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'appliaction/json'
+                        },
+                        body: JSON.stringify({
+                            query: gql
+                        })
+                    })
+                    .then(function (r) {
+                        return r.json()
+                    })
+                    .then(function (json) {
+                        console.log(json)
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                    })
                 },
                 createUser() {
                     //TO BE COMPLETED

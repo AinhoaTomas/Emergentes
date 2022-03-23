@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>Reality Whises</title>
+
+    <!-- Required Stylesheets -->
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css" />
+
+    <!-- Required scripts -->
+    <script src="//cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+    <script src="//unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+    <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+</head>
+
+<body>
+<!-- Our application root element -->
+<div id="vue-template">
+        <h3>Sign In</h3>
+
+        <b-form-group horizontal :label-cols="4" label="Nombre">
+            <b-form-input v-model.trim="name" @click="getIssuings"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Apellidos:">
+            <b-form-input v-model.trim="surname"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Email:">
+            <b-form-input v-model.trim="email"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Contraseña:">
+            <b-form-input type="passwd" v-model.trim="passwd"></b-form-input>
+        </b-form-group>
+        <hr>
+        <b-button @click="addIssuing" class="btn btn-dark btn-lg btn-block">Sign In</b-button>
+        <b-button class="btn btn-dark btn-lg btn-block" href="indexIssuing.html">Acceder</b-button>
+
+        <!--p class="forgot-password text-right mt-2 mb-4">
+            <router-link to="/forgot-password">Forgot password ?</router-link>
+        </p-->
+
+
+        <b-table responsive :items="issuings">
+            <p v-for="issuing in issuings">
+                Nombre: {{issuing.name}} with email: {{issuing.email}}
+            </p>
+        </b-table>
+
+    <div v-if="!isVisible">
+        <h3>Mis deseos</h3>
+        <b-button @click="getWishes(issuingId)" class="btn btn-dark btn-lg btn-block">Ver mis deseos</b-button>
+        <b-table responsive :items="wishes">
+            <p v-for="wish in wishes">
+                {{wish.name}} with description: {{wish.description}} with price: {{wish.price}}
+            </p>
+        </b-table>
+
+        <h3>Pedir deseo</h3>
+
+        <b-form-group horizontal :label-cols="4" label="Nombre del deseo:">
+            <b-form-input v-model.trim="wishName"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Breve descripción:">
+            <b-form-input v-model.trim="wishDescription"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Precio:">
+            <b-form-input v-model.trim="wishPrice"></b-form-input>
+        </b-form-group>
+
+        <hr>
+        <b-button @click="addWish" class="btn btn-dark btn-lg btn-block">Publicar deseo</b-button>
+    </div>
+
+
+        <!--div class="social-icons">
+            <ul>
+                <li><a href="#"><i class="fa fa-google"></i></a></li>
+                <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+                <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+            </ul>
+        </div-->
+
+
+</div>
+
+
+
+<!-- Start running your app -->
+<script>
+        var app2 = new Vue({
+            el: '#vue-template',
+            data: {
+                name: '',
+                surname: '',
+                email: '',
+                passwd: '',
+                issuings: [],
+                isVisible: '',
+                wishName: '',
+                wishDescription: '',
+                wishPrice: '',
+                wishes: [],
+                issuingId: '',
+            },
+            computed: {
+                showAlert() {
+                    return this.isVisible
+                }
+            },
+            methods: {
+                addIssuing() {
+                    var self = this
+                    var gql = `mutation{addIssuing(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name }}`
+                    fetch('/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            query: gql
+                        })
+                    })
+                        .then(function(r) {
+                            return r.json()
+                        })
+                        .then(function(json) {
+                            console.log(json)
+                            console.log(this.issuing)
+                            console.log(isVisible)
+                        })
+                        .catch(function(error) {
+                            console.log(error)
+                        })
+                },
+                getIssuings() {
+                    var self = this
+                    var gQL = `query{issuings{name email}}`
+                    fetch('/graphql?query=' + encodeURIComponent(gQL))
+                        .then(function(r) {
+                            return r.json()
+                        })
+                        .then(function(json) {
+                            self.issuings = json.data.issuings
+                        })
+                        .catch(function(error) {
+                            console.log(error)
+                        })
+                },
+                addWish() {
+                    var self = this
+                    var gql = `mutation{addWish(name: "${this.name}", description: "${this.description}", price: "${this.price}"){name }}`
+                    fetch('/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            query: gql
+                        })
+                    })
+                        .then(function(r) {
+                            this.isVisible = true
+                            return r.json()
+                        })
+                        .then(function(json) {
+                            console.log(json)
+                            console.log(isVisible)
+                        })
+                        .catch(function(error) {
+                            console.log(error)
+                        })
+                },
+                getWishes(issuingId) {
+                    var self = this
+                    this.issuingId = issuingId
+                    var gQL = `query{wishesIssuing(issuingId: ${this.issuingId}){name}}`
+                    fetch('/graphql?query=' + encodeURIComponent(gQL))
+                        .then(function(r) {
+                            return r.json()
+                        })
+                        .then(function(json) {
+                            self.wishes = json.data.wishes
+                        })
+                        .catch(function(error) {
+                            console.log(error)
+                        })
+                },
+            },
+            mounted() {
+                var self = this
+                var ES = new EventSource('/news') //ruta API con notificaciones
+
+                console.log('Creando listener de eventos de servidor...')
+
+                ES.addEventListener('new-issuing', function(event) {
+                    var data = JSON.parse(JSON.parse(event.data))
+                        //bytes to string -> string to json
+                    self.issuings.push(data)
+                }, false)
+                ES.addEventListener('new-wish', function(event) {
+                    var data = JSON.parse(JSON.parse(event.data))
+                    //bytes to string -> string to json
+                    self.wishes.push(data)
+
+                }, false)
+            }
+        })
+    </script>
+</body>
+
+</html>

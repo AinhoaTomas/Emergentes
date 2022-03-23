@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <title>Reality Whises</title>
+
+    <!-- Required Stylesheets -->
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.css" />
+
+    <!-- Required scripts -->
+    <script src="//cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+    <script src="//unpkg.com/babel-polyfill@latest/dist/polyfill.min.js"></script>
+    <script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.js"></script>
+</head>
+
+<body>
+<!-- Our application root element -->
+<div id="vue-template">
+    <h3>Sign In</h3>
+
+    <b-form-group horizontal :label-cols="4" label="Nombre">
+        <b-form-input v-model.trim="name" @click="getDonors"></b-form-input>
+    </b-form-group>
+
+    <b-form-group horizontal :label-cols="4" label="Apellidos:">
+        <b-form-input v-model.trim="surname"></b-form-input>
+    </b-form-group>
+
+    <b-form-group horizontal :label-cols="4" label="Email:">
+        <b-form-input v-model.trim="email"></b-form-input>
+    </b-form-group>
+
+    <b-form-group horizontal :label-cols="4" label="Contraseña:">
+        <b-form-input type="passwd" v-model.trim="passwd"></b-form-input>
+    </b-form-group>
+    <hr>
+    <b-button @click="addDonor" class="btn btn-dark btn-lg btn-block">Sign In</b-button>
+    <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Acceder</b-button>
+
+    <!--p class="forgot-password text-right mt-2 mb-4">
+        <router-link to="/forgot-password">Forgot password ?</router-link>
+    </p-->
+
+
+    <b-table responsive :items="donors">
+        <p v-for="donor in donors">
+            {{donor.name}} with email: {{donor.email}}
+        </p>
+    </b-table>
+
+
+    <!--div class="social-icons">
+        <ul>
+            <li><a href="#"><i class="fa fa-google"></i></a></li>
+            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+        </ul>
+    </div-->
+
+
+</div>
+
+
+<!-- Start running your app -->
+<script>
+        var app2 = new Vue({
+            el: '#vue-template',
+            data: {
+                name: '',
+                surname: '',
+                email: '',
+                passwd: '',
+                donors: [],
+            },
+            computed: {
+                showAlert() {
+                    return this.name.length > 2 ? true : false
+                }
+            },
+            methods: {
+                addDonor() {
+                    var self = this
+                    var gql = `mutation{addDonor(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name email}}`
+                    console.log(gql)
+                    fetch('/graphql', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'appliaction/json'
+                        },
+                        body: JSON.stringify({
+                            query: gql
+                        })
+                    })
+                        .then(function (r) {
+                            return r.json()
+                        })
+                        .then(function (json) {
+                            console.log(json)
+                        })
+                        .catch(function (error) {
+                            console.log(error)
+                        })
+                },
+                getDonors() {
+                    var self = this
+                    var gQL = `query{donors{name email}}`
+                    console.log(gQL)
+                    fetch('/graphql?query=' + encodeURIComponent(gQL))
+                        .then(function(r) {
+                            return r.json()
+                        })
+                        .then(function(json) {
+                            self.donors = json.data.donors
+                        })
+                        .catch(function(error) {
+                            console.log(error)
+                        })
+                },
+            },
+            mounted() {
+                var self = this
+                var ES = new EventSource('/news') //ruta API con notificaciones
+
+                console.log('Creando listener de eventos de servidor...')
+
+                ES.addEventListener('new-donor', function(event) {
+                    var data = JSON.parse(JSON.parse(event.data))
+                        //bytes to string -> string to json
+                    self.donors.push(data)
+                }, false)
+            }
+        })
+    </script>
+</body>
+
+</html>

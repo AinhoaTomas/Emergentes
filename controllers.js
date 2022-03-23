@@ -133,10 +133,12 @@ const rootValue = {
     },
     addIssuing: ({ name, surname, email, passwd }) => {
         //let currEmail = issuings.find(x=>x.email === email) //encontrar email si existe
+        let issuingsList = DB.objects('Issuing')
+        let idAct = issuingsList[issuingsList.length-1].id
         let data = null
         //if (!currEmail){
             data = {
-                id:126,
+                id:idAct+1,
                 name: name,
                 surname: surname,
                 email: email,
@@ -144,6 +146,8 @@ const rootValue = {
                 wishes: Array[null], // [Wish] pero wish no definido
             }
             DB.write(() => {DB.create('Issuing', data) })
+            let issuing = { id: data.id, name: data.name, username: data.username, email: data.email, passwd: data.passwd }
+            sse.emitter.emit('new-issuing', issuing)
         //}
         return data
     },
@@ -160,6 +164,8 @@ const rootValue = {
                 wishes: Array[null], // [Wish] pero wish no definido
             }
             DB.write(() => {DB.create('Donor', data) })
+        let donor = { name: data.name, username: data.username, email: data.email, passwd: data.passwd }
+        sse.emitter.emit('new-donor', donor)
         //}
         return data
     },

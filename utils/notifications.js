@@ -12,13 +12,14 @@ exports.eventStream = (req, res) => {
 
 exports.start = () => {
 
-    emitter.on('new-post', data => {
-        STREAM.send(JSON.stringify(data), 'new-post')
+    emitter.on('new-issuing', data => {
+        STREAM.send(JSON.stringify(data), 'new-issuing')
     })
-
-    //AQUI SE PONDRIAN OTROS EVENTOS
-    emitter.on('new-user', data => {
-        STREAM.send(JSON.stringify(data), 'new-user')
+    emitter.on('new-donor', data => {
+        STREAM.send(JSON.stringify(data), 'new-donor')
+    })
+    emitter.on('new-wish', data => {
+        STREAM.send(JSON.stringify(data), 'new-wish')
     })
 
 
