@@ -79,30 +79,29 @@
             },
             computed: {
                 showAlert() {
-                    return this.name.length > 2 ? true : false
+                    return this.name.length > 2
                 }
             },
             methods: {
                 addDonor() {
                     var self = this
-                    var gql = `mutation{addDonor(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name email}}`
-                    console.log(gql)
+                    var gql = `mutation{addDonor(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name }}`
                     fetch('/graphql', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'appliaction/json'
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
                             query: gql
                         })
                     })
-                        .then(function (r) {
+                        .then(function(r) {
                             return r.json()
                         })
-                        .then(function (json) {
+                        .then(function(json) {
                             console.log(json)
                         })
-                        .catch(function (error) {
+                        .catch(function(error) {
                             console.log(error)
                         })
                 },

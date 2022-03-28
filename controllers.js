@@ -22,9 +22,11 @@ const schema = buildSchema(`
     searchWish(name:String!):[Wish]
     wishesIssuing(issuingId:Int!):[Wish]
     transactionsDonor(donorId:Int!):[Transaction]
+    searchIssuing(email: String!, passwd: String!):Issuing!
+    getIssuingId(email: String!):[Issuing]
   }
   type Mutation {
-    addWish(name:String!, description:String!, price:Float!):Wish!
+    addWish(name:String!, description:String!, price:Float!, issuingId:Int!):Wish!
     addIssuing(name:String!, surname:String!, email:String!, passwd:String!):Issuing!
     addDonor(name:String!, surname:String!, email:String!, passwd:String!):Donor!
     addTransaction(wishId:ID!, issuingId:ID!, donorId:ID!):Transaction!
@@ -71,6 +73,12 @@ const rootValue = {
     transactionsDonor: ({ donorId }) => {
         return DB.objects('Transaction').filter(x => x.donor.id === donorId)
     },
+    getIssuingId: ({ email }) => {
+        return DB.objects('Issuing').filter(x => x.email === email)
+    },
+    searchIssuing: ({ email, passwd }) => {
+        return DB.objects('Issuing').find(x => x.email === email && x.passwd === passwd)
+    },
     addPost: ({ title, content, authorId, blogId }) => {
 
         let blog = DB.objectForPrimaryKey('Blog', blogId)
@@ -110,33 +118,37 @@ const rootValue = {
         }
         return data
     },
-    addWish: ({ name, description, price}) => {
-        let currId = DB.objectForPrimaryKey('currentUserID') // id user actual
-        let currIssuer = issuings.find(x => x.id === currId).foo
-
-        if (currIssuer){
-            let data = {
-                id: 12,
-                timestamp: Date.now(),
-                name: name,
-                description: description,
-                price: price,
-                issuing: currIssuer,
-            }
-
-            DB.write(() => {DB.create('Wish', data) })
-
-            let wish = { name: data.name, description: data.description, price: data.price }
-            sse.emitter.emit('new-wish', wish)
+    addWish: ({ name, description, price, issuingId}) => {
+        /*let currId = DB.objectForPrimaryKey('Issuing', id) // id user actual
+        let issuingsList = DB.objects('Issuing')
+        let currIssuer = issuingsList.find(x => x.id === currId).foo*/
+        let wishesList = DB.objects('Wish')
+        let idAct = wishesList[wishesList.length-1].id
+        let issuing = DB.objectForPrimaryKey('Issuing', issuingId)
+        let data = null
+        data = {
+            id: idAct+1,
+            timestamp: new Date(),
+            name: name,
+            description: description,
+            price: price,
+            issuing: issuing,
         }
+
+        DB.write(() => {DB.create('Wish', data) })
+
+        let wish = { name: data.name, description: data.description, price: data.price, issuing: data.issuing.name }
+        sse.emitter.emit('new-wish', wish)
+
         return data
     },
     addIssuing: ({ name, surname, email, passwd }) => {
         //let currEmail = issuings.find(x=>x.email === email) //encontrar email si existe
         let issuingsList = DB.objects('Issuing')
         let idAct = issuingsList[issuingsList.length-1].id
+        let currEmail = issuingsList.find(x => x.email === email)
         let data = null
-        //if (!currEmail){
+        if (!currEmail){
             data = {
                 id:idAct+1,
                 name: name,
@@ -148,15 +160,17 @@ const rootValue = {
             DB.write(() => {DB.create('Issuing', data) })
             let issuing = { id: data.id, name: data.name, username: data.username, email: data.email, passwd: data.passwd }
             sse.emitter.emit('new-issuing', issuing)
-        //}
+        }
         return data
     },
     addDonor: ({ name, surname, email, passwd }) => {
         //let currEmail = issuings.find(x=>x.email === email)
+        let donorsList = DB.objects('Donor')
+        let idAct = donorsList[donorsList.length-1].id
         let data = null
         //if (!currEmail){
             data = {
-                id:127,
+                id:idAct+1,
                 name: name,
                 surname: surname,
                 email: email,
