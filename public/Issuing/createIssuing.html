@@ -53,43 +53,6 @@
             </p>
         </b-table>
 
-    <div v-if="!isVisible">
-        <h3>Mis deseos</h3>
-        <b-button @click="getWishes(issuingId)" class="btn btn-dark btn-lg btn-block">Ver mis deseos</b-button>
-        <b-table responsive :items="wishes">
-            <p v-for="wish in wishes">
-                {{wish.name}} with description: {{wish.description}} with price: {{wish.price}}
-            </p>
-        </b-table>
-
-        <h3>Pedir deseo</h3>
-
-        <b-form-group horizontal :label-cols="4" label="Nombre del deseo:">
-            <b-form-input v-model.trim="wishName"></b-form-input>
-        </b-form-group>
-
-        <b-form-group horizontal :label-cols="4" label="Breve descripción:">
-            <b-form-input v-model.trim="wishDescription"></b-form-input>
-        </b-form-group>
-
-        <b-form-group horizontal :label-cols="4" label="Precio:">
-            <b-form-input v-model.trim="wishPrice"></b-form-input>
-        </b-form-group>
-
-        <hr>
-        <b-button @click="addWish" class="btn btn-dark btn-lg btn-block">Publicar deseo</b-button>
-    </div>
-
-
-        <!--div class="social-icons">
-            <ul>
-                <li><a href="#"><i class="fa fa-google"></i></a></li>
-                <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            </ul>
-        </div-->
-
-
 </div>
 
 
@@ -104,12 +67,7 @@
                 email: '',
                 passwd: '',
                 issuings: [],
-                isVisible: '',
-                wishName: '',
-                wishDescription: '',
-                wishPrice: '',
-                wishes: [],
-                issuingId: '',
+
             },
             computed: {
                 showAlert() {
@@ -155,43 +113,6 @@
                             console.log(error)
                         })
                 },
-                addWish() {
-                    var self = this
-                    var gql = `mutation{addWish(name: "${this.wishName}", description: "${this.wishDescription}", price: ${this.wishPrice}, issuingId: ${this.issuingId}){name price}}`
-                    fetch('/graphql', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            query: gql
-                        })
-                    })
-                        .then(function(r) {
-                            return r.json()
-                        })
-                        .then(function(json) {
-                            console.log(json)
-                        })
-                        .catch(function(error) {
-                            console.log(error)
-                        })
-                },
-                getWishes(issuingId) {
-                    var self = this
-                    this.issuingId = issuingId
-                    var gQL = `query{wishesIssuing(issuingId: ${this.issuingId}){name}}`
-                    fetch('/graphql?query=' + encodeURIComponent(gQL))
-                        .then(function(r) {
-                            return r.json()
-                        })
-                        .then(function(json) {
-                            self.wishes = json.data.wishes
-                        })
-                        .catch(function(error) {
-                            console.log(error)
-                        })
-                },
             },
             mounted() {
                 var self = this
@@ -203,12 +124,6 @@
                     var data = JSON.parse(JSON.parse(event.data))
                         //bytes to string -> string to json
                     self.issuings.push(data)
-                }, false)
-                ES.addEventListener('new-wish', function(event) {
-                    var data = JSON.parse(JSON.parse(event.data))
-                    //bytes to string -> string to json
-                    self.wishes.push(data)
-
                 }, false)
             }
         })

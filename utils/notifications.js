@@ -21,6 +21,9 @@ exports.start = () => {
     emitter.on('new-wish', data => {
         STREAM.send(JSON.stringify(data), 'new-wish')
     })
+    emitter.on('new-transaction', data => {
+        STREAM.send(JSON.stringify(data), 'new-transaction')
+    })
 
 
 }

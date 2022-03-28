@@ -23,13 +23,16 @@ const schema = buildSchema(`
     wishesIssuing(issuingId:Int!):[Wish]
     transactionsDonor(donorId:Int!):[Transaction]
     searchIssuing(email: String!, passwd: String!):Issuing!
-    getIssuingId(email: String!):[Issuing]
+    getIssuingId(email: String!):Issuing!
+    searchDonor(email: String!, passwd: String!):Donor!
+    getDonorId(email: String!):Donor!
   }
   type Mutation {
     addWish(name:String!, description:String!, price:Float!, issuingId:Int!):Wish!
     addIssuing(name:String!, surname:String!, email:String!, passwd:String!):Issuing!
     addDonor(name:String!, surname:String!, email:String!, passwd:String!):Donor!
-    addTransaction(wishId:ID!, issuingId:ID!, donorId:ID!):Transaction!
+    addTransaction(wishId:Int!, issuingId:Int!, donorId:Int!, cant:Float!):Transaction!
+    editWish(wishId:Int!, cant:Float!):Wish!
   }
   type Issuing{
 	name: String
@@ -48,12 +51,14 @@ const schema = buildSchema(`
 	description: String
 	price: Float
 	issuing: Issuing
+	id: Int
   }
 
   type Transaction{
 	issuing: Issuing
 	donor: Donor
 	wish: Wish
+	cant: Float
   }
 `)
 
@@ -65,7 +70,7 @@ const rootValue = {
     wishes: () => DB.objects('Wish'),
     transactions: () => DB.objects('Transaction'),
     searchWish: ({ name }) => {
-        return DB.objects('Wish').filter(x => x.name === name)
+        return DB.objects('Wish').filter(x => x.name.toLowerCase().includes(name.toLowerCase()))
     },
     wishesIssuing: ({ issuingId }) => {
         return DB.objects('Wish').filter(x => x.issuing.id === issuingId)
@@ -73,11 +78,17 @@ const rootValue = {
     transactionsDonor: ({ donorId }) => {
         return DB.objects('Transaction').filter(x => x.donor.id === donorId)
     },
-    getIssuingId: ({ email }) => {
-        return DB.objects('Issuing').filter(x => x.email === email)
+    getIssuingId: ({ id }) => {
+        return DB.objects('Issuing').find(x => x.id === id)
     },
     searchIssuing: ({ email, passwd }) => {
         return DB.objects('Issuing').find(x => x.email === email && x.passwd === passwd)
+    },
+    getDonorId: ({ id }) => {
+        return DB.objects('Donor').find(x => x.id === id)
+    },
+    searchDonor: ({ email, passwd }) => {
+        return DB.objects('Donor').find(x => x.email === email && x.passwd === passwd)
     },
     addPost: ({ title, content, authorId, blogId }) => {
 
@@ -183,30 +194,36 @@ const rootValue = {
         //}
         return data
     },
-    addTransaction: ({ wishId, issuingId, donorId }) => {   // no se puede probar
-        let currWish = wishes.find( x=> x.id === wishId).foo
-        let transactionByWishId = transactions.find(x=>x.wish === currWish)
+    addTransaction: ({ wishId, issuingId, donorId, cant }) => {
         let data = null
-
-        if (transactionByWishId == undefined){
-            data = {
-                id:3,
-                timestamp: Date.now(),
-                issuing: issuings.find(x => x.id === issuingId).foo,
-                donor: donors.find(x => x.id === donorId).foo,
-                wish: currWish,
-            }
-            DB.write(() => {DB.create('Transaction', data) })
+        let donorsList = DB.objects('Donor')
+        let donor = donorsList.find(x => x.id === donorId)
+        let issuingsList = DB.objects('Issuing')
+        let issuing = issuingsList.find(x => x.id === issuingId)
+        let wishesList = DB.objects('Wish')
+        let wish = wishesList.find(x => x.id === wishId)
+        let transactionsList = DB.objects('Transaction')
+        let idAct = transactionsList[transactionsList.length-1].id
+        data = {
+            id: idAct+1,
+            timestamp: new Date(),
+            issuing: issuing,
+            donor: donor,
+            wish: wish,
+            cant: cant,
         }
+        DB.write(() => {DB.create('Transaction', data) })
+        let transaction = { wish: data.wish, cant: data.cant, donor: data.donor }
+        sse.emitter.emit('new-transaction', transaction)
         return data
     },
-    userWishes: ({ userId }) => {
+    /*userWishes: ({ userId }) => {
         let user = issuings.find(x=>x.id === userId).foo
         if(user == undefined){
             user = donors.find(x=x.id === userId).foo
         }
         return user.wishes
-    }
+    }*/
 }
 
 exports.root = rootValue

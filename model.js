@@ -50,6 +50,7 @@ let TransactionSchema = {
         issuing: 'Issuing',
         donor: 'Donor',
         wish: 'Wish',
+        cant: 'float',
     }
 }
 
@@ -80,7 +81,7 @@ if (process.argv[1] == __filename) { //TESTING PART
 
             let wish = DB.create('Wish', {id: 1, timestamp: new Date(), name: 'Deseo 1', description: 'Descripcion', price: 12, issuing: issuing})
 
-            let transaction = DB.create('Transaction', {id: 8, timestamp: new Date(), issuing: issuing, donor:donor, wish: wish})
+            let transaction = DB.create('Transaction', {id: 8, timestamp: new Date(), issuing: issuing, donor:donor, wish: wish, cant: 10})
 
             console.log('Inserted objects', issuing, donor, wish, transaction)
         })
@@ -96,7 +97,7 @@ if (process.argv[1] == __filename) { //TESTING PART
             let wishes = DB.objects('Wish')
             wishes.forEach(x => console.log(x.name, x.issuing.name, x.timestamp, x.price, x.issuing.id))
             let transaction = DB.objects('Transaction')
-            transaction.forEach(x => console.log(x.id, x.donor.name, x.issuing.name, x.wish.name))
+            transaction.forEach(x => console.log(x.id, x.donor.name, x.issuing.name, x.wish.name, x.cant))
             DB.close()
         })
     }
