@@ -21,23 +21,25 @@
 <body>
 <!-- Our application root element -->
 <div id="vue-template">
-    <h3>Inicio de sesión</h3>
-    <b-form-group horizontal :label-cols="4" label="Email:">
-        <b-form-input v-model.trim="email"></b-form-input>
+    <b-form-group v-if="!isVisible">
+        <h3>Inicio de sesión</h3>
+        <b-form-group horizontal :label-cols="4" label="Email:">
+            <b-form-input v-model.trim="email"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Contraseña:">
+            <b-form-input type="passwd" v-model.trim="passwd"></b-form-input>
+        </b-form-group>
+        <hr>
+        <b-button class="btn btn-dark btn-lg btn-block" @click="sesion">Acceder</b-button>
+        <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Inicio</b-button>
     </b-form-group>
 
-    <b-form-group horizontal :label-cols="4" label="Contraseña:">
-        <b-form-input type="passwd" v-model.trim="passwd"></b-form-input>
-    </b-form-group>
-    <hr>
-    <b-button class="btn btn-dark btn-lg btn-block" @click="sesion">Acceder</b-button>
-    <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Atrás</b-button>
 
-    <b-table responsive :items="issuingId">
-        id: {{issuingId}}
-    </b-table>
 
     <b-form-group v-if="isVisible">
+        <h3>Bienvenido </h3>
+        <hr>
         <h3>Mis deseos</h3>
         <b-button @click="getWishes(issuingId)" class="btn btn-dark btn-lg btn-block">Ver mis deseos</b-button>
         <b-table responsive :items="wishes">
@@ -45,7 +47,19 @@
                 {{wish.name}} with description: {{wish.description}} with price: {{wish.price}}
             </p>
         </b-table>
-
+        <hr>
+        <h3>Transacciones recibidas</h3>
+        <b-button @click="getTransactions(issuingId)" class="btn btn-dark btn-lg btn-block">Ver las transacciones recibidas</b-button>
+        <div v-if="transactions.length>0">
+            <b-card>
+                <ul>
+                    <p v-for="transaction in transactions">
+                        Transacción de {{transaction.cant}}€ para el deseo {{transaction.wish.name}} efectuado por {{transaction.donor.name}}
+                    </p>
+                </ul>
+            </b-card>
+        </div>
+        <hr>
         <h3>Pedir deseo</h3>
 
         <b-form-group horizontal :label-cols="4" label="Nombre del deseo:">
@@ -59,10 +73,23 @@
         <b-form-group horizontal :label-cols="4" label="Precio:">
             <b-form-input v-model.trim="price"></b-form-input>
         </b-form-group>
+        <hr>
 
+        <b-card responsive :items="transactionsNew">
+            <h3>Nuevas transacciones recibidas</h3>
+            <b-div v-if="transactionsNew.length===0">
+                <p>No tienes transacciones nuevas</p>
+            </b-div>
+            <ul>
+                <p v-for="transactionNew in transactionsNew" v-if="(transactionNew.issuing === issuingId)">
+                    Nueva transacción de {{transactionNew.cant}}€ para el deseo {{transactionNew.wish}} efectuado por {{transactionNew.donor}}
+                </p>
+            </ul>
+        </b-card>
         <hr>
         <b-button @click="addWish" class="btn btn-dark btn-lg btn-block">Publicar deseo</b-button>
-    </b-form-group>
+        <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Atrás</b-button>
+    <b-form-group>
 
 
 </div>
@@ -82,6 +109,8 @@
             issuingId: '',
             wishes: [],
             isVisible: false,
+            transactions: [],
+            transactionsNew: [],
         },
         computed: {
             showAlert() {
@@ -143,6 +172,21 @@
                         console.log(error)
                     })
             },
+            getTransactions(issuingId) {
+                var self = this
+                var gQL = `query{transactionsIssuing(issuingId: ${issuingId}){wish{name} donor{name} cant}}`
+                fetch('/graphql?query=' + encodeURIComponent(gQL))
+                    .then(function(r) {
+                        return r.json()
+                    })
+                    .then(function(json) {
+                        console.log(json)
+                        self.transactions = json.data.transactionsIssuing
+                    })
+                    .catch(function(error) {
+                        console.log(error)
+                    })
+            },
         },
         mounted() {
             var self = this
@@ -150,10 +194,10 @@
 
             console.log('Creando listener de eventos de servidor...')
 
-            ES.addEventListener('new-wish', function(event) {
+            ES.addEventListener('new-transaction', function(event) {
                 var data = JSON.parse(JSON.parse(event.data))
                 //bytes to string -> string to json
-                self.wishes.push(data)
+                self.transactionsNew.push(data)
             }, false)
         }
     })
