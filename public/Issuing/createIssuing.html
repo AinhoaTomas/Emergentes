@@ -40,7 +40,8 @@
         </b-form-group>
         <hr>
         <b-button @click="addIssuing" class="btn btn-dark btn-lg btn-block">Sign In</b-button>
-        <b-button class="btn btn-dark btn-lg btn-block" href="indexIssuing.html">Acceder</b-button>
+        <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Inicio</b-button>
+    <b-button v-if="isRegistred" class="btn btn-dark btn-lg btn-block" href="indexIssuing.html">Acceder</b-button>
 
         <!--p class="forgot-password text-right mt-2 mb-4">
             <router-link to="/forgot-password">Forgot password ?</router-link>
@@ -67,7 +68,7 @@
                 email: '',
                 passwd: '',
                 issuings: [],
-
+                isRegistred: false,
             },
             computed: {
                 showAlert() {
@@ -92,8 +93,7 @@
                         })
                         .then(function(json) {
                             console.log(json)
-                            self.issuingId = json.data.addIssuing.id
-                            console.log(json.data.addIssuing.id)
+                            self.isRegistred = true
                         })
                         .catch(function(error) {
                             console.log(error)

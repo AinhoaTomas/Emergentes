@@ -21,39 +21,70 @@
 <body>
 <!-- Our application root element -->
 <div id="vue-template">
-    <h3>Inicio de sesión</h3>
-    <b-form-group horizontal :label-cols="4" label="Email:">
-        <b-form-input v-model.trim="email"></b-form-input>
+    <b-form-group v-if="!isVisible">
+        <h3>Inicio de sesión</h3>
+        <b-form-group horizontal :label-cols="4" label="Email:">
+            <b-form-input v-model.trim="email"></b-form-input>
+        </b-form-group>
+
+        <b-form-group horizontal :label-cols="4" label="Contraseña:">
+            <b-form-input type="passwd" v-model.trim="passwd"></b-form-input>
+        </b-form-group>
+        <hr>
+        <b-button class="btn btn-dark btn-lg btn-block" @click="sesion">Acceder</b-button>
+        <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Inicio</b-button>
     </b-form-group>
 
-    <b-form-group horizontal :label-cols="4" label="Contraseña:">
-        <b-form-input type="passwd" v-model.trim="passwd"></b-form-input>
-    </b-form-group>
-    <hr>
-    <b-button class="btn btn-dark btn-lg btn-block" @click="sesion">Acceder</b-button>
-    <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Atrás</b-button>
 
-    <b-table responsive :items="donorId">
-        id: {{donorId}}
-    </b-table>
+    <b-form-group v-if="isVisible">
+        <h3>Bienvenido </h3>
+        <hr>
+        <h3>Generar transacciones</h3>
+        <b-form-group horizontal :label-cols="4" label="Buscador de deseos">
+            <b-form-input v-model.trim="query" placeholder="... por ejemplo pizza" @keyup.enter="searchWish">
+            </b-form-input>
+        </b-form-group>
+        <div v-if="wishes.length>0">
+            <b-card>
+                <ul>
+                    <p v-for="wish in wishes">
+                        <b-button @click="transaction(wish.id, wish.issuing.id)">{{wish.name}}</b-button> by {{wish.issuing.name}}
+                    </p>
+                </ul>
+            </b-card>
+        </div>
 
-    <b-form-group v-if="isVisible" horizontal :label-cols="4" label="Buscador de deseos">
-        <b-form-input v-model.trim="query" placeholder="... por ejemplo pizza" @keyup.enter="searchWish">
-        </b-form-input>
-    </b-form-group>
-    <div v-if="wishes.length>0">
-        <b-card>
+        <b-form-group v-if="isTransaction">
+            <b-form-group horizontal :label-cols="4" label="Subencionar deseo:">
+                <b-form-input v-model.trim="cant" placeholder="... por ejemplo 15"></b-form-input>
+            </b-form-group>
+            <b-button class="btn btn-dark btn-lg btn-block" @click="addTransaction">Añadir transacción</b-button>
+        </b-form-group><hr>
+        <h3>Transacciones efectuadas</h3>
+        <b-button @click="getTransactions(donorId)" class="btn btn-dark btn-lg btn-block">Ver las transacciones efectuadas</b-button>
+        <div v-if="transactions.length>0">
+            <b-card>
+                <ul>
+                    <p v-for="transaction in transactions">
+                        Transacción de {{transaction.cant}}€ para el deseo {{transaction.wish.name}} del usuario {{transaction.issuing.name}}
+                    </p>
+                </ul>
+            </b-card>
+        </div>
+        <hr>
+        <b-card responsive :items="wishesNew">
+            <h3>Nuevos deseos</h3>
+            <b-div v-if="wishesNew.length===0">
+                <p>No hay deseos nuevos</p>
+            </b-div>
             <ul>
-                <p v-for="wish in wishes">
-                    <b-button @click="transaction(wish.id, wish.issuing.id)">{{wish.name}}</b-button> by {{wish.issuing.name}}
+                <p v-for="wish in wishesNew">
+                    Nuevo deseo: {{wish.name}} con descripción {{wish.description}} por un total de {{wish.price}}€ del usuario {{wish.issuing}}
                 </p>
             </ul>
         </b-card>
-    </div>
-
-    <b-form-group v-if="isTransaction" horizontal :label-cols="4" label="Subencionar deseo">
-        <b-form-input v-model.trim="cant" placeholder="... por ejemplo 15" @keyup.enter="addTransaction">
-        </b-form-input>
+        <hr>
+        <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Inicio</b-button>
     </b-form-group>
 
 </div>
@@ -143,6 +174,21 @@
                         console.log(error)
                     })
             },
+            getTransactions(donorId) {
+                var self = this
+                var gQL = `query{transactionsDonor(donorId: ${donorId}){wish{name} issuing{name} cant}}`
+                fetch('/graphql?query=' + encodeURIComponent(gQL))
+                    .then(function(r) {
+                        return r.json()
+                    })
+                    .then(function(json) {
+                        console.log(json)
+                        self.transactions = json.data.transactionsDonor
+                    })
+                    .catch(function(error) {
+                        console.log(error)
+                    })
+            },
 
         },
         mounted() {
@@ -156,11 +202,7 @@
                 //bytes to string -> string to json
                 self.wishesNew.push(data)
             }, false)
-            ES.addEventListener('new-transaction', function(event) {
-                var data = JSON.parse(JSON.parse(event.data))
-                //bytes to string -> string to json
-                self.transaction.push(data)
-            }, false)
+
         }
     })
 </script>

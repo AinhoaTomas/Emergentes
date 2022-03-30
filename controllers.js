@@ -22,6 +22,7 @@ const schema = buildSchema(`
     searchWish(name:String!):[Wish]
     wishesIssuing(issuingId:Int!):[Wish]
     transactionsDonor(donorId:Int!):[Transaction]
+    transactionsIssuing(issuingId:Int!):[Transaction]
     searchIssuing(email: String!, passwd: String!):Issuing!
     getIssuingId(email: String!):Issuing!
     searchDonor(email: String!, passwd: String!):Donor!
@@ -78,6 +79,9 @@ const rootValue = {
     transactionsDonor: ({ donorId }) => {
         return DB.objects('Transaction').filter(x => x.donor.id === donorId)
     },
+    transactionsIssuing: ({ issuingId }) => {
+        return DB.objects('Transaction').filter(x => x.issuing.id === issuingId)
+    },
     getIssuingId: ({ id }) => {
         return DB.objects('Issuing').find(x => x.id === id)
     },
@@ -90,49 +94,7 @@ const rootValue = {
     searchDonor: ({ email, passwd }) => {
         return DB.objects('Donor').find(x => x.email === email && x.passwd === passwd)
     },
-    addPost: ({ title, content, authorId, blogId }) => {
-
-        let blog = DB.objectForPrimaryKey('Blog', blogId)
-        let auth = DB.objectForPrimaryKey('User', authorId)
-        let data = null
-
-        if (blog && auth) {
-            data = {
-                title: title,
-                content: content,
-                author: auth,
-                blog: blog,
-                timestamp: new Date()
-            }
-
-            DB.write(() => { DB.create('Post', data) })
-
-            // SSE notification (same view as in graphQL)
-            let post = { title: data.title, content: data.content, author: { name: data.author.name }, blog: { title: blog.title } }
-            sse.emitter.emit('new-post', post)
-        }
-
-        return data
-    },
-    addUser: ({ name }) => {
-        let user = DB.objectForPrimaryKey('User', name)
-        let data = null
-        if (!user) {
-            data = {
-                name: name,
-                passwd: name,
-            }
-            DB.write(() => { DB.create('User', data) })
-
-            let user = { name: data.name, passwd: data.passwd }
-            sse.emitter.emit('new-user', user)
-        }
-        return data
-    },
     addWish: ({ name, description, price, issuingId}) => {
-        /*let currId = DB.objectForPrimaryKey('Issuing', id) // id user actual
-        let issuingsList = DB.objects('Issuing')
-        let currIssuer = issuingsList.find(x => x.id === currId).foo*/
         let wishesList = DB.objects('Wish')
         let idAct = wishesList[wishesList.length-1].id
         let issuing = DB.objectForPrimaryKey('Issuing', issuingId)
@@ -166,7 +128,7 @@ const rootValue = {
                 surname: surname,
                 email: email,
                 passwd: passwd,
-                wishes: Array[null], // [Wish] pero wish no definido
+                wishes: Array[null],
             }
             DB.write(() => {DB.create('Issuing', data) })
             let issuing = { id: data.id, name: data.name, username: data.username, email: data.email, passwd: data.passwd }
@@ -186,7 +148,7 @@ const rootValue = {
                 surname: surname,
                 email: email,
                 passwd: passwd,
-                wishes: Array[null], // [Wish] pero wish no definido
+                wishes: Array[null],
             }
             DB.write(() => {DB.create('Donor', data) })
         let donor = { name: data.name, username: data.username, email: data.email, passwd: data.passwd }
@@ -213,7 +175,7 @@ const rootValue = {
             cant: cant,
         }
         DB.write(() => {DB.create('Transaction', data) })
-        let transaction = { wish: data.wish, cant: data.cant, donor: data.donor }
+        let transaction = { wish: data.wish.name, cant: data.cant, donor: data.donor.name, issuing: data.issuing.id }
         sse.emitter.emit('new-transaction', transaction)
         return data
     },
