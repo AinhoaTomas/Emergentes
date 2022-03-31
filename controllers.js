@@ -183,12 +183,6 @@ const rootValue = {
         }
         return data
     },
-    editWish: ({ wishId, cant }) => {
-        let wishesList = DB.objects('Wish')
-        let wish = wishesList.find(x => x.id === wishId)
-        DB.write(() => {wish.price -= cant})
-        return wish
-    },
 }
 
 exports.root = rootValue
