@@ -179,6 +179,12 @@ const rootValue = {
         sse.emitter.emit('new-transaction', transaction)
         return data
     },
+    editWish: ({ wishId, cant }) => {
+        let wishesList = DB.objects('Wish')
+        let wish = wishesList.find(x => x.id === wishId)
+        DB.write(() => {wish.price -= cant})
+        return wish
+    },
     /*userWishes: ({ userId }) => {
         let user = issuings.find(x=>x.id === userId).foo
         if(user == undefined){

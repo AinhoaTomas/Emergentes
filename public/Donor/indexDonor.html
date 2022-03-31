@@ -48,7 +48,7 @@
             <b-card>
                 <ul>
                     <p v-for="wish in wishes">
-                        <b-button @click="transaction(wish.id, wish.issuing.id)">{{wish.name}}</b-button> by {{wish.issuing.name}}
+                        <b-button @click="transaction(wish.id, wish.issuing.id)">{{wish.name}}</b-button> de {{wish.issuing.name}} por un total de {{wish.price}}€
                     </p>
                 </ul>
             </b-card>
@@ -134,7 +134,7 @@
             },
             searchWish() {
                 var self = this
-                var gql = `query{searchWish(name: "${this.query}"){name id description issuing{id name}}}`
+                var gql = `query{searchWish(name: "${this.query}"){name id description price issuing{id name}}}`
                 fetch('/graphql?query=' + encodeURIComponent(gql))
                     .then(function(r) {
                         return r.json()
@@ -168,11 +168,13 @@
                         return r.json()
                     })
                     .then(function(json) {
+                        self.editWish(self.wishId, self.cant)
                         console.log(json)
                     })
                     .catch(function(error) {
                         console.log(error)
                     })
+
             },
             getTransactions(donorId) {
                 var self = this
@@ -189,6 +191,29 @@
                         console.log(error)
                     })
             },
+            editWish(wishId, cant) {
+                var self = this
+                var gql = `mutation{editWish(wishId: ${wishId}, cant: ${cant}){name price}}`
+                fetch('/graphql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: gql
+                    })
+                })
+                    .then(function(r) {
+                        return r.json()
+                    })
+                    .then(function(json) {
+                        console.log(json.data.editWish.price)
+                        console.log(json)
+                    })
+                    .catch(function(error) {
+                        console.log(error)
+                    })
+            }
 
         },
         mounted() {
