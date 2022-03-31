@@ -33,6 +33,12 @@
         <hr>
         <b-button class="btn btn-dark btn-lg btn-block" @click="sesion">Acceder</b-button>
         <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Inicio</b-button>
+        <div v-if="!sesionOk">
+            <b-card>
+                <p>Ha ocurrido un error en el inicio de seión, asegurese de que los datos introducidos son correctos</p>
+            </b-card>
+        </div>
+
     </b-form-group>
 
 
@@ -59,10 +65,16 @@
                 <b-form-input v-model.trim="cant" placeholder="... por ejemplo 15"></b-form-input>
             </b-form-group>
             <b-button class="btn btn-dark btn-lg btn-block" @click="addTransaction">Añadir transacción</b-button>
-        </b-form-group><hr>
+        </b-form-group>
+        <div v-if="!transactionOk">
+            <b-card>
+                <p>Ha ocurrido un error en la transacción, revise que la cantidad a transferir es igual o menor que el total del deseo</p>
+            </b-card>
+        </div>
+        <hr>
         <h3>Transacciones efectuadas</h3>
         <b-button @click="getTransactions(donorId)" class="btn btn-dark btn-lg btn-block">Ver las transacciones efectuadas</b-button>
-        <div v-if="transactions.length>0">
+        <div v-if="transactions.length>0 && transactionOk">
             <b-card>
                 <ul>
                     <p v-for="transaction in transactions">
@@ -71,6 +83,7 @@
                 </ul>
             </b-card>
         </div>
+
         <hr>
         <b-card responsive :items="wishesNew">
             <h3>Nuevos deseos</h3>
@@ -98,6 +111,7 @@
         data: {
             email: '',
             passwd: '',
+            sesionOk: true,
             query: '',
             name: '',
             cant: '',
@@ -109,6 +123,7 @@
             transactions: [],
             isVisible: false,
             isTransaction: false,
+            transactionOk: true,
         },
         computed: {
             showAlert() {
@@ -124,9 +139,14 @@
                         return r.json()
                     })
                     .then(function(json) {
-                        self.donorId = json.data.searchDonor.id
-                        self.isVisible = true
-                        console.log(self.donorId)
+                        if (json.data != null) {
+                            self.donorId = json.data.searchDonor.id
+                            self.isVisible = true
+                            console.log(self.donorId)
+                        }else{
+                            self.sesionOk = false
+                        }
+
                     })
                     .catch(function(error) {
                         console.log(error)
@@ -168,8 +188,12 @@
                         return r.json()
                     })
                     .then(function(json) {
-                        self.editWish(self.wishId, self.cant)
-                        console.log(json)
+                        if (json.data != null) {
+                            console.log(json)
+                            self.transactionOk = true
+                        }else{
+                            self.transactionOk = false
+                        }
                     })
                     .catch(function(error) {
                         console.log(error)

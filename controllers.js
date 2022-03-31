@@ -116,7 +116,6 @@ const rootValue = {
         return data
     },
     addIssuing: ({ name, surname, email, passwd }) => {
-        //let currEmail = issuings.find(x=>x.email === email) //encontrar email si existe
         let issuingsList = DB.objects('Issuing')
         let idAct = issuingsList[issuingsList.length-1].id
         let currEmail = issuingsList.find(x => x.email === email)
@@ -137,11 +136,11 @@ const rootValue = {
         return data
     },
     addDonor: ({ name, surname, email, passwd }) => {
-        //let currEmail = issuings.find(x=>x.email === email)
         let donorsList = DB.objects('Donor')
         let idAct = donorsList[donorsList.length-1].id
+        let currEmail = donorsList.find(x => x.email === email)
         let data = null
-        //if (!currEmail){
+        if (!currEmail){
             data = {
                 id:idAct+1,
                 name: name,
@@ -151,9 +150,9 @@ const rootValue = {
                 wishes: Array[null],
             }
             DB.write(() => {DB.create('Donor', data) })
-        let donor = { name: data.name, username: data.username, email: data.email, passwd: data.passwd }
-        sse.emitter.emit('new-donor', donor)
-        //}
+            let donor = { name: data.name, username: data.username, email: data.email, passwd: data.passwd }
+            sse.emitter.emit('new-donor', donor)
+        }
         return data
     },
     addTransaction: ({ wishId, issuingId, donorId, cant }) => {
@@ -166,17 +165,22 @@ const rootValue = {
         let wish = wishesList.find(x => x.id === wishId)
         let transactionsList = DB.objects('Transaction')
         let idAct = transactionsList[transactionsList.length-1].id
-        data = {
-            id: idAct+1,
-            timestamp: new Date(),
-            issuing: issuing,
-            donor: donor,
-            wish: wish,
-            cant: cant,
+        if (wish.price >= cant) {
+            data = {
+                id: idAct + 1,
+                timestamp: new Date(),
+                issuing: issuing,
+                donor: donor,
+                wish: wish,
+                cant: cant,
+            }
+            DB.write(() => {
+                DB.create('Transaction', data)
+            })
+            DB.write(() => {wish.price -= cant})
+            let transaction = {wish: data.wish.name, cant: data.cant, donor: data.donor.name, issuing: data.issuing.id}
+            sse.emitter.emit('new-transaction', transaction)
         }
-        DB.write(() => {DB.create('Transaction', data) })
-        let transaction = { wish: data.wish.name, cant: data.cant, donor: data.donor.name, issuing: data.issuing.id }
-        sse.emitter.emit('new-transaction', transaction)
         return data
     },
     editWish: ({ wishId, cant }) => {
@@ -185,13 +189,6 @@ const rootValue = {
         DB.write(() => {wish.price -= cant})
         return wish
     },
-    /*userWishes: ({ userId }) => {
-        let user = issuings.find(x=>x.id === userId).foo
-        if(user == undefined){
-            user = donors.find(x=x.id === userId).foo
-        }
-        return user.wishes
-    }*/
 }
 
 exports.root = rootValue

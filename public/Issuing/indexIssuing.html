@@ -33,6 +33,11 @@
         <hr>
         <b-button class="btn btn-dark btn-lg btn-block" @click="sesion">Acceder</b-button>
         <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Inicio</b-button>
+        <div v-if="!sesionOk">
+            <b-card>
+                <p>Ha ocurrido un error en el inicio de seión, asegurese de que los datos introducidos son correctos</p>
+            </b-card>
+        </div>
     </b-form-group>
 
 
@@ -89,7 +94,7 @@
         <hr>
         <b-button @click="addWish" class="btn btn-dark btn-lg btn-block">Publicar deseo</b-button>
         <b-button class="btn btn-dark btn-lg btn-block" href="../index.html">Atrás</b-button>
-    <b-form-group>
+    </b-form-group>
 
 
 </div>
@@ -103,6 +108,7 @@
         data: {
             email: '',
             passwd: '',
+            sesionOk: true,
             name: '',
             description: '',
             price: '',
@@ -126,9 +132,13 @@
                         return r.json()
                     })
                     .then(function(json) {
-                        self.issuingId = json.data.searchIssuing.id
-                        self.isVisible = true
-                        console.log(self.issuingId)
+                        if (json.data != null) {
+                            self.issuingId = json.data.searchIssuing.id
+                            self.isVisible = true
+                            console.log(self.issuingId)
+                        }else{
+                            self.sesionOk = false
+                        }
                     })
                     .catch(function(error) {
                         console.log(error)
