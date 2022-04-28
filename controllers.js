@@ -2,6 +2,8 @@ const { graphql, buildSchema } = require('graphql')
 
 const model = require('./model') //Database
 
+//const jsonld = require('my-graph.json')
+
 let DB
 model.getDB().then(db => { DB = db })
 
