@@ -1,11 +1,11 @@
 const { graphql, buildSchema } = require('graphql')
-const BSON = require('bson')
 
 const model = require('./model') //Database
 
 let DB
 model.getDB().then(db => { DB = db })
 
+const ObjectId = require('bson-objectid')
 
 const sse = require('./utils/notifications') //Notifications
 sse.start()
@@ -38,13 +38,15 @@ const schema = buildSchema(`
   type Issuing{
 	name: String
 	email: String
-	id: Int
+	_id: ID
+	wishes: [Wish]
   }
   
   type Donor{
     name: String
     email: String
-    id: Int
+    _id: ID
+    wishes: [Wish]
   }
 
   type Wish{
@@ -52,7 +54,7 @@ const schema = buildSchema(`
 	description: String
 	price: Float
 	issuing: Issuing
-	id: Int
+	_id: ID
   }
 
   type Transaction{
@@ -100,19 +102,17 @@ const rootValue = {
         let issuing = DB.objectForPrimaryKey('Issuing', issuingId)
         let data = null
         data = {
-            id: idAct+1,
+            _id: ObjectId(),
+            _partition: model.patitionKey,
             timestamp: new Date(),
             name: name,
             description: description,
             price: price,
             issuing: issuing,
         }
-
         DB.write(() => {DB.create('Wish', data) })
-
         let wish = { name: data.name, description: data.description, price: data.price, issuing: data.issuing.name }
         sse.emitter.emit('new-wish', wish)
-
         return data
     },
     addIssuing: ({ name, surname, email, passwd }) => {
@@ -122,7 +122,8 @@ const rootValue = {
         let data = null
         if (!currEmail){
             data = {
-                id:idAct+1,
+                _id: ObjectId(),
+                _partition: model.patitionKey,
                 name: name,
                 surname: surname,
                 email: email,
@@ -142,7 +143,8 @@ const rootValue = {
         let data = null
         if (!currEmail){
             data = {
-                id:idAct+1,
+                _id: ObjectId(),
+                _partition: model.patitionKey,
                 name: name,
                 surname: surname,
                 email: email,
@@ -165,19 +167,30 @@ const rootValue = {
         let wish = wishesList.find(x => x.id === wishId)
         let transactionsList = DB.objects('Transaction')
         let idAct = transactionsList[transactionsList.length-1].id
+        if (idAct === undefined) {
+            idAct = 0
+        }
         if (wish.price >= cant) {
             data = {
-                id: idAct + 1,
+                _id: ObjectId(),
+                _partition: model.patitionKey,
                 timestamp: new Date(),
                 issuing: issuing,
                 donor: donor,
                 wish: wish,
                 cant: cant,
             }
-            DB.write(() => {
-                DB.create('Transaction', data)
-            })
+            DB.write(() => {DB.create('Transaction', data)})
+            DB.write(() => {donor.wishes.push(wish)})
             DB.write(() => {wish.price -= cant})
+            /*for (let index in issuing.wishes){
+                let id = issuing.wishes[index].id
+                if (id === wish.id) {
+                    DB.write(() => {issuing.wishes.splice(issuing.wishes[index], 1)})
+                }
+            }
+            DB.write(() => {issuing.wishes.push(wish)})
+            DB.write(() => {donor.wishes.push(wish)})*/
             let transaction = {wish: data.wish.name, cant: data.cant, donor: data.donor.name, issuing: data.issuing.id}
             sse.emitter.emit('new-transaction', transaction)
         }

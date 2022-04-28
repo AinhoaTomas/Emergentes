@@ -94,87 +94,15 @@
             data: {
                 name: '', //nombre de usuario (no se usa)
                 query: '', //búsqueda
-                blogId: '', //blog activado
-                blogs: [], //blogs de la búsqueda
-                posts: [], //posts del blog activado
                 users: [],
-                post: '', //nuevo post
-                postId: 0
             },
             computed: {
                 showAlert() {
-                    return this.name.length > 2 ? true : false
+                    return this.name.length > 2
                 }
             },
             methods: {
-                searchBlogs() {
-                    var self = this
-                    var gQL = `query{searchBlog(q:"${this.query}"){title creator{name}}}`
-
-                    fetch('/graphql?query=' + encodeURIComponent(gQL))
-                        .then(function(r) {
-                            return r.json()
-                        })
-                        .then(function(json) {
-                            self.blogs = json.data.searchBlog
-                        })
-                        .catch(function(error) {
-                            console.log(error)
-                        })
-                },
-                getPosts(blogId) {
-                    var self = this
-
-                    this.blogId = blogId
-
-                    var gQL = `query{posts(blogId:"${this.blogId}"){title content author{name}}}`
-                    console.log(gQL)
-                    fetch('/graphql?query=' + encodeURIComponent(gQL))
-                        .then(function(r) {
-                            return r.json()
-                        })
-                        .then(function(json) {
-                            self.posts = json.data.posts
-                        })
-                        .catch(function(error) {
-                            console.log(error)
-                        })
-                },
-                addPost() {
-                    var self = this
-
-                    if (this.post.trim().length == 0) return false
-
-                    this.postId++
-
-                        var gQL = `mutation{addPost(blogId:"${this.blogId}",
-                                        title: "Prueba ${this.name} ${this.postId}",
-                                        content: "${this.post}",
-                                        authorId: "${this.name}")
-                                {title}}`
-
-                    console.log(gQL)
-                    fetch('/graphql', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                query: gQL
-                            })
-                        })
-                        .then(function(r) {
-                            return r.json()
-                        })
-                        .then(function(json) {
-                            console.log(json)
-                        })
-                        .catch(function(error) {
-                            console.log(error)
-                        })
-                },
                 createUser() {
-                    //TO BE COMPLETED
                     var self = this
                     var gQL = `mutation{addUser(name: "${this.name}"){name}}`
                     console.log(gQL)
@@ -204,12 +132,6 @@
 
                 console.log('Creando listener de eventos de servidor...')
 
-                ES.addEventListener('new-post', function(event) {
-                    var data = JSON.parse(JSON.parse(event.data))
-                        //bytes to string -> string to json
-                    if (data.blog.title == self.blogId)
-                        self.posts.push(data)
-                }, false)
                 ES.addEventListener('new-user', function(event) {
                     var data = JSON.parse(JSON.parse(event.data))
                     self.users.push(data)

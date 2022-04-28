@@ -78,7 +78,7 @@
             methods: {
                 addIssuing() {
                     var self = this
-                    var gql = `mutation{addIssuing(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name id }}`
+                    var gql = `mutation{addIssuing(name: "${this.name}", surname: "${this.surname}", email: "${this.email}", passwd: "${this.passwd}"){name _id }}`
                     fetch('/graphql', {
                         method: 'POST',
                         headers: {

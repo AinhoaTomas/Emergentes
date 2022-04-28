@@ -126,14 +126,14 @@
         methods: {
             sesion() {
                 var self = this
-                var gql = `query{searchIssuing(email: "${this.email}", passwd: "${this.passwd}"){name id}}`
+                var gql = `query{searchIssuing(email: "${this.email}", passwd: "${this.passwd}"){name _id}}`
                 fetch('/graphql?query=' + encodeURIComponent(gql))
                     .then(function(r) {
                         return r.json()
                     })
                     .then(function(json) {
                         if (json.data != null) {
-                            self.issuingId = json.data.searchIssuing.id
+                            self.issuingId = json.data.searchIssuing._id
                             self.isVisible = true
                             console.log(self.issuingId)
                         }else{

@@ -54,7 +54,7 @@
             <b-card>
                 <ul>
                     <p v-for="wish in wishes">
-                        <b-button @click="transaction(wish.id, wish.issuing.id)">{{wish.name}}</b-button> de {{wish.issuing.name}} por un total de {{wish.price}}€
+                        <b-button @click="transaction(wish._id, wish.issuing._id)">{{wish.name}}</b-button> de {{wish.issuing.name}} por un total de {{wish.price}}€
                     </p>
                 </ul>
             </b-card>
@@ -133,14 +133,14 @@
         methods: {
             sesion() {
                 var self = this
-                var gql = `query{searchDonor(email: "${this.email}", passwd: "${this.passwd}"){name id}}`
+                var gql = `query{searchDonor(email: "${this.email}", passwd: "${this.passwd}"){name _id}}`
                 fetch('/graphql?query=' + encodeURIComponent(gql))
                     .then(function(r) {
                         return r.json()
                     })
                     .then(function(json) {
                         if (json.data != null) {
-                            self.donorId = json.data.searchDonor.id
+                            self.donorId = json.data.searchDonor._id
                             self.isVisible = true
                             console.log(self.donorId)
                         }else{
@@ -154,7 +154,7 @@
             },
             searchWish() {
                 var self = this
-                var gql = `query{searchWish(name: "${this.query}"){name id description price issuing{id name}}}`
+                var gql = `query{searchWish(name: "${this.query}"){name _id description price issuing{_id name}}}`
                 fetch('/graphql?query=' + encodeURIComponent(gql))
                     .then(function(r) {
                         return r.json()

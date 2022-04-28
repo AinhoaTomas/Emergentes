@@ -1,12 +1,14 @@
 const Realm = require('realm')
-const BSON = require('bson')
+const ObjectId = require('bson-objectid')
 
+const app = new Realm.App({id: "application-realitywishes-igjfx"})
 
 let IssuingSchema = {
   name: 'Issuing',
-  primaryKey: 'id',
+  primaryKey: '_id',
   properties: {
-    id: 'int',
+    _id: 'objectId',
+    _partition: 'string',
     name: 'string',
     surname: 'string',
     email: 'string',
@@ -17,9 +19,10 @@ let IssuingSchema = {
 
 let DonorSchema = {
     name: 'Donor',
-    primaryKey: 'id',
+    primaryKey: '_id',
     properties: {
-        id: 'int',
+        _id: 'objectId',
+        _partition: 'string',
         name: 'string',
         surname: 'string',
         email: 'string',
@@ -30,9 +33,10 @@ let DonorSchema = {
 
 let WishScheme = {
     name: 'Wish',
-    primaryKey: 'id',
+    primaryKey: '_id',
     properties: {
-        id: 'int',
+        _id: 'objectId',
+        _partition: 'string',
         timestamp: 'date',
         name: 'string',
         description: 'string',
@@ -43,9 +47,10 @@ let WishScheme = {
 
 let TransactionSchema = {
     name: 'Transaction',
-    primaryKey: 'id',
+    primaryKey: '_id',
     properties: {
-        id: 'int',
+        _id: 'objectId',
+        _partition: 'string',
         timestamp: 'date',
         issuing: 'Issuing',
         donor: 'Donor',
@@ -56,9 +61,22 @@ let TransactionSchema = {
 
 // // // MODULE EXPORTS
 
-let config = { path: './data/blogs.realm', schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema] }
+const myPartitionKey = "myAppPartition"
 
-exports.getDB = async() => await Realm.open(config)
+let sync = {user: app.currentUser, partitionValue: myPartitionKey}
+
+let config = { path: './data/blogs.realm',
+                sync: sync,
+                schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema]
+}
+
+exports.getDB = async () => {
+    await app.logIn(new Realm.Credentials.anonymous())
+    return await Realm.open(config)
+}
+
+exports.patitionKey = myPartitionKey
+exports.app = app
 
 // // // // // 
 
@@ -68,24 +86,29 @@ if (process.argv[1] == __filename) { //TESTING PART
 
         Realm.deleteFile({ path: './data/blogs.realm' }) //borramos base de datos si existe
 
-        let DB = new Realm({
-            path: './data/blogs.realm',
-            schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema]
+        app.logIn(new Realm.Credentials.anonymous()).then(() => {
+            let DB = new Realm({
+                path: './data/blogs.realm',
+                sync: sync,
+                schema: [IssuingSchema, DonorSchema, WishScheme, TransactionSchema]
+            })
+            DB.write(() => {
+
+                let issuing = DB.create('Issuing', {_id: ObjectId(), _partition: myPartitionKey, name: 'ainhoa', surname: 'tomas', email: 'correoAinhoa', passwd: '1234', wishes: []})
+
+                let donor = DB.create('Donor', {_id: ObjectId(), _partition: myPartitionKey, name: 'marc', surname: 'villanueva', email: 'correoMarc', passwd: '123', wishes: []})
+
+                let wish = DB.create('Wish', {_id: ObjectId(), _partition: myPartitionKey, timestamp: new Date(), name: 'Deseo 1', description: 'Descripcion', price: 12, issuing: issuing})
+
+                let transaction = DB.create('Transaction', {_id: ObjectId(), _partition: myPartitionKey, timestamp: new Date(), issuing: issuing, donor:donor, wish: wish, cant: 10})
+
+                console.log('Inserted objects', issuing, donor, wish, transaction)
+            })
+            DB.close()
         })
+            .catch(err => console.log(err))
 
-        DB.write(() => {
 
-            let issuing = DB.create('Issuing', {id: 126, name: 'ainhoa', surname: 'tomas', email: 'correoAinhoa', passwd: '1234', wishes: []})
-
-            let donor = DB.create('Donor', {id: 5, name: 'marc', surname: 'villanueva', email: 'correoMarc', passwd: '123', wishes: []})
-
-            let wish = DB.create('Wish', {id: 1, timestamp: new Date(), name: 'Deseo 1', description: 'Descripcion', price: 12, issuing: issuing})
-
-            let transaction = DB.create('Transaction', {id: 8, timestamp: new Date(), issuing: issuing, donor:donor, wish: wish, cant: 10})
-
-            console.log('Inserted objects', issuing, donor, wish, transaction)
-        })
-        DB.close()
 
     } else { //consultar la BD
 
@@ -94,10 +117,10 @@ if (process.argv[1] == __filename) { //TESTING PART
             issuings.forEach(x => console.log(x.name, x.id))
             let donors = DB.objects('Donor')
             donors.forEach(x => console.log(x.name, x.id))
-            let wishes = DB.objects('Wish')
+            /*let wishes = DB.objects('Wish')
             wishes.forEach(x => console.log(x.name, x.issuing.name, x.timestamp, x.price, x.issuing.id))
             let transaction = DB.objects('Transaction')
-            transaction.forEach(x => console.log(x.id, x.donor.name, x.issuing.name, x.wish.name, x.cant))
+            transaction.forEach(x => console.log(x.id, x.donor.name, x.issuing.name, x.wish.name, x.cant))*/
             DB.close()
         })
     }
