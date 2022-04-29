@@ -1,0 +1,144 @@
+{
+  "@context": "https://schema.org/WebAPI",
+  "@type": "Web API",
+  "@id": "localhost:graphql",
+  "description": "RealityWishes es una aplicación de marca España desarrollada por un grupo de jóvenes emprendedores. Esta aplicación gratuita permite publicar tus deseos, tales como proyectos o caprichos y compartirlos con el resto del mundo para que aquellos dispuesto a ello ofrezcan una donación o subvención. Adicionalmente, también podrás consultar y contribuir a los deseos del resto de usuarios con la cantidad que creas conveniente, sin obligación alguna.",
+  "logo": "",
+  "slogan": "Make your wishes come true",
+  "provider": [
+    {
+      "@type": "Provider",
+      "@id": "Marc",
+      "@context": "https://schema.org/Person",
+      "name": "Marc",
+      "givenName": "Villanueva",
+      "email": "al386108@uji.es",
+      "url": "https://aulavirtual.uji.es/user/profile.php?id=150605",
+      "workLocation": {
+        "@type": "Place",
+        "name": "Espaitec",
+        "address": "Avda Sos Baynat s/n 12071 – Castellón de la Plana (Spain)",
+        "telephone": "964387390",
+        "url": "https://espaitec.uji.es/",
+        "hasMap": "https://goo.gl/maps/6XBTw32A8JE52X1b7"
+      },
+      "description": "Backend developer",
+      "nationality": "Español",
+      "knowsLanguage": "Valenciano, castellano e inglés",
+      "colleague": "https://www.uji.es/"
+    },
+    {
+      "@type": "Provider",
+      "@id": "Ainhoa",
+      "@context": "https://schema.org/Person",
+      "name": "Ainhoa",
+      "givenName": "Tomás",
+      "email": "al386133@uji.es",
+      "url": "https://aulavirtual.uji.es/user/profile.php?id=150671",
+      "workLocation": {
+        "@type": "Place",
+        "name": "Espaitec",
+        "address": "Avda Sos Baynat s/n 12071 – Castellón de la Plana (Spain)",
+        "telephone": "964387390",
+        "url": "https://espaitec.uji.es/",
+        "hasMap": "https://goo.gl/maps/6XBTw32A8JE52X1b7"
+      },
+      "description": "Fullstack developer",
+      "nationality": "Española",
+      "knowsLanguage": "Valenciano, castellano e inglés",
+      "colleague": "https://www.uji.es/"
+    },
+    {
+      "@type": "Provider",
+      "@id": "Javier",
+      "@context": "https://schema.org/Person",
+      "name": "Javier",
+      "givenName": "Diaz",
+      "email": "al388523@uji.es",
+      "url": "https://aulavirtual.uji.es/user/profile.php?id=147499",
+      "workLocation": {
+        "@type": "Place",
+        "name": "Espaitec",
+        "address": "Avda Sos Baynat s/n 12071 – Castellón de la Plana (Spain)",
+        "telephone": "964387390",
+        "url": "https://espaitec.uji.es/",
+        "hasMap": "https://goo.gl/maps/6XBTw32A8JE52X1b7"
+      },
+      "description": "Frontend developer",
+      "nationality": "Español",
+      "knowsLanguage": "Valenciano, castellano e inglés",
+      "colleague": "https://www.uji.es/"
+    }
+  ],
+  "audience":{
+    "@context": "https://schema.org/Audience",
+    "@id": "Audiencia",
+    "@type": "Audience",
+    "audienceType": "RealityWishes está pensado para cualquier persona mayor de edad, independientemente de su situación laboral o geográfica. Sin embargo, se espera que la mayor cantidad de usuarios se encuentren entre la adolescencia y la avanzada edad incluida aquella jubilada, emprendedores y autónomos. La otra minoría, serían aquellas dispuestas a realizar donaciones altruístas.",
+    "description": "Grupo de personas objetivo a la que está destinada la aplicación. Se espera que la mayor cantidad de usuarios se encuentren clasificados entre los diferentes grupos mencionados. Sin embargo, los deseos de los usuarios pueden estar relacionados o incluso destinados a aquellos que no se encuentren en el listado.",
+    "name": "Audiencia esperada."
+  },
+  "potentialAction": [
+    {
+      "@context":"https://schema.org/DonateAction",
+      "@type": "DonateAction",
+      "@id": "Donación",
+      "recipient": {
+        "@context": "https://schema.org/Audience",
+        "@id": "Audiencia",
+        "@type": "Audience",
+        "audienceType": "Esta acción disponible en RealityWishes será exclusivamente utilizada por aquellos usuarios que decidan ingresar a la aplicación como donantes. Sin embargo, estará destinada para aquellos usuarios que ingresen a la aplicación como deseantes.",
+        "description": "Grupo de personas objetivo a la que está destinada esta funcionalidad de la aplicación. Se espera que los usuarios que puedan realizar tal acción se encuentren en el grupo minoritario anteriomente definido. Y, por consiguiente, las personas que reciban el resultado de la acción se encuentren en la mayoría definida.",
+        "name": "Donación."
+      },
+      "priceCurrency": "Euro (€)",
+      "error": {
+        "@context": "https://schema.org/Thing",
+        "@id": "Error transacción",
+        "@type": "Thing",
+        "description": "En caso de fallar la transacción, el dinero será revertido al donante, sin perder ningún activo del capital ofrecido.",
+        "disambiguatingDescription": "Este apartado hace referencia a la transacción realizada entre donante y demandante de un deseo, específicamente a cuando esta falla debido a un problema interno o del propio usuario.",
+        "name": "Caso de transacción fallida",
+        "potentialAction": "DonateAction"
+      },
+      "result": {
+        "@context": "https://schema.org/Thing",
+        "@id":"Éxito transacción",
+        "@type": "Thing",
+        "description": "En caso de realizar la transacción con éxito, el dinero será acumulado en la propia aplicación hasta que el objetivo de capital sea cumplido. Entonces, el dinero será enviado al demandante.",
+        "disambiguatingDescription": "Este apartado hace referencia a la transacción realizada entre donante y demandante de un deseo, específicamente a cuando esta se realiza con éxito.",
+        "name": "Caso de transacción realizada con éxito"
+      }
+    },
+    {
+      "@context":"https://schema.org/AskAction",
+      "@type": "AskAction",
+      "@id": "Desear",
+      "recipient": {
+        "@context": "https://schema.org/Audience",
+        "@id": "Audiencia",
+        "@type": "Audience",
+        "audienceType": "Esta acción disponible en RealityWishes será exclusivamente utilizada por aquellos usuarios que decidan ingresar a la aplicación como deseantes. Sin embargo, la petición que esta acción realice estará destinada a los usuarios donantes.",
+        "description": "Grupo de personas objetivo a la que está destinada esta funcionalidad de la aplicación. Se espera que los usuarios que puedan realizar tal acción se encuentren en el grupo mayoritario anteriomente definido. Por ende, su destinatario será la minoría registrada en la aplicación.",
+        "name": "Petición."
+      },
+      "priceCurrency": "Euro (€)",
+      "error": {
+        "@context": "https://schema.org/Thing",
+        "@id": "Error petición",
+        "@type": "Thing",
+        "description": "En caso de fallar la acción, el deseo no quedará registrado ni publicado. El usuario deberá intentar de nuevo la creación de su deseo.",
+        "disambiguatingDescription": "Este apartado hace referencia a qué ocurre cuando el intento de creación o publicación de un deseo falla debido a problemas internos de la aplicación o del propio usuario.",
+        "name": "Caso de creación fallido"
+      },
+      "result": {
+        "@context": "https://schema.org/Thing",
+        "@id":"Éxito transacción",
+        "@type": "Thing",
+        "description": "En caso de realizar la creación y publicación del deseo con éxito, este quedará reigstrado en el muro de la aplicación, siendo visible para cualquier posible donante además de mostrar información sobre el avance de la recaudación.",
+        "disambiguatingDescription": "Este apartado hace referencia a cuando la petición por parte de un usuario deseante se realiza con éxito y qué conlleva ello.",
+        "name": "Caso de petición realizada con éxito."
+      }
+    }
+  ]
+}

@@ -2,7 +2,7 @@ const { graphql, buildSchema } = require('graphql')
 
 const model = require('./model') //Database
 
-//const jsonld = require('my-graph.json')
+const jsonLD = require('./my-graph.json')
 
 let DB
 model.getDB().then(db => { DB = db })
@@ -20,6 +20,7 @@ const schema = buildSchema(`
     donors: [Donor]
     wishes: [Wish]
     transactions: [Transaction]
+    jsonld: String
     
     searchWish(name:String!):[Wish]
     wishesIssuing(issuingId:Int!):[Wish]
@@ -74,6 +75,7 @@ const rootValue = {
     donors: () => DB.objects('Donor'),
     wishes: () => DB.objects('Wish'),
     transactions: () => DB.objects('Transaction'),
+    jsonld:() => JSON.stringify(jsonLD),
     searchWish: ({ name }) => {
         return DB.objects('Wish').filter(x => x.name.toLowerCase().includes(name.toLowerCase()))
     },
